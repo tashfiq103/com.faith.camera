@@ -1,0 +1,15 @@
+{
+    "name": "com.faith.camera",
+    "references": [
+        "GUID:f20f4210caa6c124a87f1517de5f3288"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,17 @@
+{
+    "name": "com.faith.camera.Editor",
+    "references": [
+        "GUID:dba8dc1e58ccd2a4dac7a04fc1f42357"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
