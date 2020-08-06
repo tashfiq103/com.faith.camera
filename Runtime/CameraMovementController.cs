@@ -3,6 +3,13 @@
     using UnityEngine.Events;
     using UnityEngine;
 
+    [System.Serializable]
+    public struct Constraint {
+        public bool x;
+        public bool y;
+        public bool z;
+    }
+
     public class CameraMovementController : MonoBehaviour {
 
         #region Public Variables
@@ -29,13 +36,18 @@
         public Transform cameraTransformReference;
         [Range (0f, 1f)]
         public float defaultMaxFocusingValue = 0.1f;
+
+        [Space (5.0f)]
+        public Vector3 defaultCameraPositionOffset;
         [Range (0f, 1f)]
         public float defaultForwardVelocity = 0.5f;
+
+        [Space (5.0f)]
+        public Vector3 defaultCameraFocusOffset;
+        public Constraint defaultFocusConstraint;
         [Range (0f, 1f)]
         public float defaultAngulerVelocity = 0.1f;
         public AnimationCurve defaultAngulerVelocityThroughProgression = new AnimationCurve (new Keyframe[] { new Keyframe (0f, 0f), new Keyframe (1f, 1f) });
-        public Vector3 defaultCameraFocusOffset;
-        public Vector3 defaultCameraPositionOffset;
 
         [Space (10.0f)]
         [Header ("Configuretion  :   CameraViewOnTargets")]
@@ -52,7 +64,6 @@
         #endregion
 
         #region Private Variables
-
 
         private bool m_IsCameraOrthographic;
         private bool m_IsFollowingObject;
@@ -72,6 +83,8 @@
         private float m_ModifiedZoom;
 
         private Bounds m_NewCameraBounds;
+
+        private Constraint m_FocusConstraint;
 
         private Transform m_TransformReferenceOfCameraOrigin;
         private List<Transform> m_ListOfCameraFocuses;
@@ -190,7 +203,11 @@
                 t_AbsoluteCameraFocus += m_CameraFocusOffset;
             }
 
-            m_FocusPosition = t_AbsoluteCameraFocus;
+            m_FocusPosition = new Vector3 (
+                m_FocusConstraint.x ? m_CameraFocusOffset.x : t_AbsoluteCameraFocus.x,
+                m_FocusConstraint.y ? m_CameraFocusOffset.y : t_AbsoluteCameraFocus.y,
+                m_FocusConstraint.z ? m_CameraFocusOffset.z : t_AbsoluteCameraFocus.z
+            );
             m_FocusedEulerAngle = Quaternion.LookRotation (m_FocusPosition - cameraTransformReference.position).eulerAngles;
 
         }
@@ -211,12 +228,11 @@
             cameraContainerTransformReference.position = m_ModifiedPosition;
 
             if (!m_IsFollowingObject && (Vector3.Distance (m_ModifiedPosition, m_NewOriginPositionOfCamera) <= 0.1f && Vector3.Distance (cameraTransformReference.eulerAngles, m_FocusedEulerAngle) <= 0.1)) {
-                
+
                 OnCameraReachedTargetedPosition?.Invoke ();
                 EnableAndDisableThisMonoBehaviour (false);
             }
 
-            
         }
 
         private void RotateCamera () {
@@ -270,8 +286,9 @@
             float t_CameraAngulerVelocity = 0,
             AnimationCurve t_AngulerVelocityThroughProgression = null,
             UnityAction OnCameraReachedTargetedPosition = null,
-            Transform t_CameraOriginWhileTarget = null) {
-            
+            Transform t_CameraOriginWhileTarget = null,
+            Constraint t_FocusConstraint = new Constraint ()) {
+
             m_IsFollowingObject = t_IsFollowingObject;
 
             m_TransformReferenceOfCameraOrigin = t_CameraOriginWhileTarget;
@@ -320,6 +337,11 @@
 
             this.OnCameraReachedTargetedPosition = OnCameraReachedTargetedPosition;
 
+            if (t_FocusConstraint.x == false && t_FocusConstraint.y == false && t_FocusConstraint.z == false)
+                m_FocusConstraint = defaultFocusConstraint;
+            else
+                m_FocusConstraint = t_FocusConstraint;
+
             //Calculating Bound
             CalculateCameraBound ();
 
@@ -357,7 +379,7 @@
             Transform t_CameraOriginWhileTarget,
             List<Transform> t_ListOfCameraFocuses,
             UnityAction OnCameraReachedTargetedPosition) {
-                
+
             FocusCameraWithOrigin (
                 t_CameraOriginWhileTarget,
                 t_ListOfCameraFocuses,
@@ -371,6 +393,7 @@
                 OnCameraReachedTargetedPosition
             );
         }
+
         public void FocusCameraWithOrigin (
             Transform t_CameraOriginWhileTarget,
             List<Transform> t_ListOfCameraFocuses,
@@ -399,9 +422,32 @@
             );
         }
 
-        public void FocusCameraAsArea (
+        public void FocusCameraWithOriginAndFocusConstraint (
+            Transform t_CameraOriginWhileTarget,
             List<Transform> t_ListOfCameraFocuses,
-            bool t_UseOffsetFocusOnLocalSpace = false,
+            Constraint t_FocusConstraint,
+            UnityAction OnCameraReachedTargetedPosition) {
+
+            FocusCameraWithOriginAndFocusConstraint (
+                t_CameraOriginWhileTarget,
+                t_ListOfCameraFocuses,
+                t_FocusConstraint,
+                false,
+                Vector3.zero,
+                Vector3.zero,
+                0,
+                0,
+                0,
+                null,
+                OnCameraReachedTargetedPosition
+            );
+        }
+
+        public void FocusCameraWithOriginAndFocusConstraint (
+            Transform t_CameraOriginWhileTarget,
+            List<Transform> t_ListOfCameraFocuses,
+            Constraint t_FocusConstraint = new Constraint (),
+            bool t_UseFocusOffsetOnLocalSpace = false,
             Vector3 t_CameraFocusOffset = new Vector3 (),
             Vector3 t_CameraPositionOffset = new Vector3 (),
             float t_CameraFocusValue = 0,
@@ -414,7 +460,7 @@
             ConfigureCamera (
                 false,
                 t_ListOfCameraFocuses,
-                t_UseOffsetFocusOnLocalSpace,
+                t_UseFocusOffsetOnLocalSpace,
                 t_CameraFocusOffset,
                 t_CameraPositionOffset,
                 t_CameraFocusValue,
@@ -422,7 +468,8 @@
                 t_CameraAngulerVelocity,
                 t_AngulerVelocityThroughProgression,
                 OnCameraReachedTargetedPosition,
-                null
+                t_CameraOriginWhileTarget,
+                t_FocusConstraint
             );
         }
 
@@ -453,10 +500,66 @@
             );
         }
 
-        public void UnfollowCamera(){
+        public void FollowCameraWithFocusConstraint (
+            Transform t_CameraOriginWhileTarget,
+            List<Transform> t_ListOfCameraFocuses,
+            Constraint t_FocusConstraint = new Constraint (),
+            bool t_UseFocusOffsetOnLocalSpace = false,
+            Vector3 t_CameraFocusOffset = new Vector3 (),
+            Vector3 t_CameraPositionOffset = new Vector3 (),
+            float t_CameraFocusValue = 0,
+            float t_CameraForwardVelocity = 0,
+            float t_CameraAngulerVelocity = 0,
+            AnimationCurve t_AngulerVelocityThroughProgression = null
+        ) {
+
+            ConfigureCamera (
+                true,
+                t_ListOfCameraFocuses,
+                t_UseFocusOffsetOnLocalSpace,
+                t_CameraFocusOffset,
+                t_CameraPositionOffset,
+                t_CameraFocusValue,
+                t_CameraForwardVelocity,
+                t_CameraAngulerVelocity,
+                t_AngulerVelocityThroughProgression,
+                OnCameraReachedTargetedPosition,
+                t_CameraOriginWhileTarget,
+                t_FocusConstraint
+            );
+        }
+
+        public void UnfollowCamera () {
 
             m_IsFollowingObject = false;
-        }     
+        }
+
+        public void FocusCameraAsArea (
+            List<Transform> t_ListOfCameraFocuses,
+            bool t_UseOffsetFocusOnLocalSpace = false,
+            Vector3 t_CameraFocusOffset = new Vector3 (),
+            Vector3 t_CameraPositionOffset = new Vector3 (),
+            float t_CameraFocusValue = 0,
+            float t_CameraForwardVelocity = 0,
+            float t_CameraAngulerVelocity = 0,
+            AnimationCurve t_AngulerVelocityThroughProgression = null,
+            UnityAction OnCameraReachedTargetedPosition = null
+        ) {
+
+            ConfigureCamera (
+                false,
+                t_ListOfCameraFocuses,
+                t_UseOffsetFocusOnLocalSpace,
+                t_CameraFocusOffset,
+                t_CameraPositionOffset,
+                t_CameraFocusValue,
+                t_CameraForwardVelocity,
+                t_CameraAngulerVelocity,
+                t_AngulerVelocityThroughProgression,
+                OnCameraReachedTargetedPosition,
+                null
+            );
+        }
 
         #endregion
     }
