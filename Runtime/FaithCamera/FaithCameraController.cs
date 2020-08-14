@@ -92,24 +92,24 @@
 
                 Vector3 t_NormalizedDirection = Vector3.Normalize(t_TargetPosition - t_OriginPosition);
                 t_AbsoluteCameraFocus = t_TargetPosition;
-                t_AbsoluteCameraFocus += (t_NormalizedDirection * m_CurrentCameraSettings.focusOffset.z);
+                t_AbsoluteCameraFocus += (t_NormalizedDirection * m_CurrentCameraSettings.cameraFocusOffset.z);
                 t_AbsoluteCameraFocus += new Vector3(
                     t_NormalizedDirection.z,
                     0,
                     t_NormalizedDirection.x
-                ) * m_CurrentCameraSettings.focusOffset.x;
-                t_AbsoluteCameraFocus += Vector3.up * m_CurrentCameraSettings.focusOffset.y;
+                ) * m_CurrentCameraSettings.cameraFocusOffset.x;
+                t_AbsoluteCameraFocus += Vector3.up * m_CurrentCameraSettings.cameraFocusOffset.y;
             }
             else
             {
 
-                t_AbsoluteCameraFocus += m_CurrentCameraSettings.focusOffset;
+                t_AbsoluteCameraFocus += m_CurrentCameraSettings.cameraFocusOffset;
             }
 
             m_FocusPosition = new Vector3(
-                m_CurrentCameraSettings.focusConstraint.x ? m_CurrentCameraSettings.focusOffset.x : t_AbsoluteCameraFocus.x,
-                m_CurrentCameraSettings.focusConstraint.y ? m_CurrentCameraSettings.focusOffset.y : t_AbsoluteCameraFocus.y,
-                m_CurrentCameraSettings.focusConstraint.z ? m_CurrentCameraSettings.focusOffset.z : t_AbsoluteCameraFocus.z
+                m_CurrentCameraSettings.focusConstraint.x ? m_CurrentCameraSettings.cameraFocusOffset.x : t_AbsoluteCameraFocus.x,
+                m_CurrentCameraSettings.focusConstraint.y ? m_CurrentCameraSettings.cameraFocusOffset.y : t_AbsoluteCameraFocus.y,
+                m_CurrentCameraSettings.focusConstraint.z ? m_CurrentCameraSettings.cameraFocusOffset.z : t_AbsoluteCameraFocus.z
             );
             m_FocusedEulerAngle = Quaternion.LookRotation(m_FocusPosition - m_CameraTransformReference.position).eulerAngles;
 
@@ -120,7 +120,7 @@
 
             Vector3 t_CurrentPositionOfTheCamera = cameraContainerTransformReference.position;
             Vector3 t_CameraOrigin               = m_CameraOriginPosition == null ? m_FocusPosition : m_CameraOriginPosition.position;
-            t_CameraOrigin                      += m_CurrentCameraSettings.positionOffset;
+            t_CameraOrigin                      += m_CurrentCameraSettings.cameraPositionOffset;
 
             Vector3 m_SmothTime = Vector3.one * 0.0167f;
             float t_CurrentForwardVelocity = m_CameraOriginPosition == null

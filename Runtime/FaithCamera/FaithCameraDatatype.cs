@@ -28,6 +28,15 @@
     public class CameraSettings {
 
 
+#if UNITY_EDITOR
+
+        public bool showParameterOfForwardVelocity;
+        public bool showParameterOfAngulerVelocity;
+        public bool showParameterOfRateOfChangeOnFOV;
+        public bool showParameterOfRateOfChangeOnOrthographicSize;
+
+#endif
+
         [Range (0f, 1f)]
         public float forwardVelocity = 0.2f;
         public AnimationCurve curveForForwardVelocity = new AnimationCurve(new Keyframe[] { new Keyframe(0f, 0f), new Keyframe(1f, 1f) });
@@ -52,12 +61,14 @@
         public AnimationCurve curveForRateOfChangeOnOrthographicSize = new AnimationCurve(new Keyframe[] { new Keyframe(0f, 0f), new Keyframe(1f, 1f) });
         //---------------
 
-        public Vector3 positionOffset = Vector3.zero;
-
-        public FocusType focusType = FocusType.Once;
-        public Constraint focusConstraint;
-        public bool isUseFocusOffsetOnLocalSpace = false;
-        public Vector3  focusOffset = Vector3.zero;
+        public Vector3      cameraPositionOffset = Vector3.zero;
+        public Vector3      cameraFocusOffset = Vector3.zero;
+        public bool         isUseFocusOffsetOnLocalSpace = false;
+        public Constraint   focusConstraint;
+        public FocusType    focusType = FocusType.Once;
+        
+        
+        
         
     }
 }
