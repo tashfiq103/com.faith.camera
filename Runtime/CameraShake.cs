@@ -1,4 +1,5 @@
-﻿namespace com.faithstudio.Camera {
+﻿namespace com.faithstudio.camera
+{
 
     using UnityEngine;
 
@@ -62,7 +63,8 @@
         {
         }
 
-        private void Update() {
+        private void Update()
+        {
 
             float t_DetalTime = Time.deltaTime;
             if (m_RemainingTimeForCameraShake > 0)
@@ -95,7 +97,8 @@
                 }
             }
             else if (
-                Vector3.Distance(cameraContainerTransformReference.localPosition, m_InitialPositionOfCameraContainer) >= 0.1f) {
+                Vector3.Distance(cameraContainerTransformReference.localPosition, m_InitialPositionOfCameraContainer) >= 0.1f)
+            {
 
                 Vector3 m_ModifiedPosition = Vector3.Lerp(
                         cameraContainerTransformReference.localPosition,
@@ -113,7 +116,7 @@
             }
             else
             {
-                cameraContainerTransformReference.localPosition= m_InitialPositionOfCameraContainer;
+                cameraContainerTransformReference.localPosition = m_InitialPositionOfCameraContainer;
                 cameraContainerTransformReference.localEulerAngles = m_InitialLocalEulerAngleIfCameraContainer;
                 m_IsCameraShakeControllerRunning = false;
                 enabled = false;
@@ -137,7 +140,7 @@
 
         }
 
-       
+
 
         #endregion
 

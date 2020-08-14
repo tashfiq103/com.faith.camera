@@ -1,5 +1,5 @@
 ﻿
-namespace com.faithstudio.Camera
+namespace com.faithstudio.camera
 {
     using UnityEngine;
     using UnityEditor;
