@@ -34,6 +34,8 @@
         public bool showParameterOfAngulerVelocity;
         public bool showParameterOfRateOfChangeOnFOV;
         public bool showParameterOfRateOfChangeOnOrthographicSize;
+        public bool showParameterOfOffsets;
+        public bool showParameterForAdvancedSettings;
 
 #endif
 
