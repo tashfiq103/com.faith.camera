@@ -37,6 +37,7 @@
         public bool showParameterOfOffsets;
         public bool showParameterForAdvancedSettings;
 
+
 #endif
 
         [Range (0f, 1f)]
