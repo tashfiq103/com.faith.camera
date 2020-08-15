@@ -104,6 +104,8 @@
 
         public bool showOnEditor;
 
+        public int indexOfSelectedCameraSettings = 0;
+
 #endif
 
         public bool useCentralCameraSettings = true;

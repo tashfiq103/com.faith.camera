@@ -11,6 +11,7 @@
 #if UNITY_EDITOR
 
         public bool showDefaultInspector;
+        public bool showPresetsOfCameraSettings;
 
 #endif
 

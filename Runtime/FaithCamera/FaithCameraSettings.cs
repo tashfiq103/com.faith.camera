@@ -57,6 +57,22 @@
 
         #region Public Callback
 
+        public int GetNumberOfAvailableCameraSettings()
+        {
+
+            return cameraSettings.Count;
+        }
+
+        public string GetNameOfCameraSettings(int t_IndexOfCameraSetting) {
+
+            if (IsValidIndexOfCameraSetting(t_IndexOfCameraSetting)) {
+
+                return cameraSettings[t_IndexOfCameraSetting].name;
+            }
+
+            return "InvalidName";
+        }
+
         public CameraSettings GetCameraSettings(int t_IndexOfCameraSetting) {
 
             if (IsValidIndexOfCameraSetting(t_IndexOfCameraSetting))
@@ -77,6 +93,8 @@
 
             return null;
         }
+
+        
 
         #endregion
 

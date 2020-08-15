@@ -237,6 +237,37 @@
             EditorGUI.LabelField(rect, "", GUI.skin.horizontalSlider);
         }
 
+        public void DrawSettingsEditor(Object settings, System.Action OnSettingsUpdated, ref bool foldout, ref Editor editor)
+        {
+
+            if (settings != null)
+            {
+
+                using (var check = new EditorGUI.ChangeCheckScope())
+                {
+
+                    foldout = EditorGUILayout.InspectorTitlebar(foldout, settings);
+
+                    if (foldout)
+                    {
+
+                        CreateCachedEditor(settings, null, ref editor);
+                        editor.OnInspectorGUI();
+
+                        if (check.changed)
+                        {
+
+                            if (OnSettingsUpdated != null)
+                            {
+
+                                OnSettingsUpdated.Invoke();
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
         #endregion
     }
 }
