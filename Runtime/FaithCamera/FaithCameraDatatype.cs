@@ -1,6 +1,7 @@
 ﻿namespace com.faith.camera {
     
     using UnityEngine;
+    using System.Collections.Generic;
 
     [System.Serializable]
     public struct Constraint
@@ -22,6 +23,12 @@
     {
         Once,
         Follow
+    }
+
+    public enum TransationType
+    {
+        Cinematic,
+        Dynamic
     }
 
     [System.Serializable]
@@ -70,8 +77,41 @@
         public Constraint   focusConstraint;
         public FocusType    focusType = FocusType.Once;
         
-        
-        
+    }
+
+    [System.Serializable]
+    public class CameraTransationClip
+    {
+        public Transform        cameraOrigin;
+        public List<Transform>  cameraFocuses;
+
+        public CameraSettings cameraSettings;
+
+        [Range(0.1f,50f)]
+        public float durationOfTransation;
+
+        [Range(0f, 180f)]
+        public float overrideCameraFOV = 60;
+        [Range(0f, 180f)]
+        public float overrideCameraOrthographicSize = 6;
+    }
+
+    [System.Serializable]
+    public class CameraTransation
+    {
+
+#if UNITY_EDITOR
+
+        public bool showOnEditor;
+
+#endif
+
+        public bool useCentralCameraSettings = true;
+        public string nameOfTransation;
+        public TransationType transationType;
+        public CameraSettings defaultCameraSettings;
+
+        public List<CameraTransationClip> transationClips;
         
     }
 }
