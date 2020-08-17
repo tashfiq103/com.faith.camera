@@ -265,8 +265,8 @@
             EditorGUILayout.BeginVertical();
             {
 
-                SerializedProperty t_SPCameraOrigin = t_SPTransationClips.GetArrayElementAtIndex(j).FindPropertyRelative("cameraOrigin");
-                SerializedProperty t_SPCameraFocuses = t_SPTransationClips.GetArrayElementAtIndex(j).FindPropertyRelative("cameraFocuses");
+                SerializedProperty t_SPCameraOrigin = t_SPTransationClips.GetArrayElementAtIndex(t_ClipIndex).FindPropertyRelative("cameraOrigin");
+                SerializedProperty t_SPCameraFocuses = t_SPTransationClips.GetArrayElementAtIndex(t_ClipIndex).FindPropertyRelative("cameraFocuses");
 
                 if (SP_CameraSettingPersets.objectReferenceValue != null)
                 {
@@ -276,7 +276,7 @@
                 if (!t_UseThisTransationSettingsForAllClip)
                 {
 
-                    SerializedProperty t_SPCameraSettingsForTransationClip = t_SPTransationClips.GetArrayElementAtIndex(j).FindPropertyRelative("cameraSettings");
+                    SerializedProperty t_SPCameraSettingsForTransationClip = t_SPTransationClips.GetArrayElementAtIndex(t_ClipIndex).FindPropertyRelative("cameraSettings");
                     EditorGUILayout.PropertyField(t_SPCameraSettingsForTransationClip);
                 }
 
