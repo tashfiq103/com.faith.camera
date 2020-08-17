@@ -65,7 +65,10 @@
                 EditorGUILayout.Space();
                 if (GUILayout.Button("+CameraSettings")) {
 
-                    Reference.cameraSettings.Add(new CameraSettingsInfo());
+                    CameraSettingsInfo t_NewCameraSettings = new CameraSettingsInfo();
+                    t_NewCameraSettings.name = "CamSettings (" + Reference.cameraSettings.Count + ")";
+
+                    Reference.cameraSettings.Add(t_NewCameraSettings);
                 }
             }
 

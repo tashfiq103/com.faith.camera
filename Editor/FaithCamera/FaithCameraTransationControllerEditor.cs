@@ -83,6 +83,8 @@
 
         private void CustomGUI() {
 
+            CustomGUIForPresetCameraSettings();
+
             List<string> t_OptionsForCameraSettings = new List<string>();
             if (Reference.cameraSettingPresets != null)
             {
@@ -95,46 +97,13 @@
             }
             t_OptionsForCameraSettings.Add("Custom");
 
-            EditorGUILayout.Space();
-            EditorGUILayout.BeginHorizontal();
-            {
-                EditorGUI.BeginChangeCheck();
-                EditorGUILayout.PropertyField(SP_CameraSettingPersets);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    if (SP_CameraSettingPersets.objectReferenceValue == null) {
-
-                        int t_NumberOfTransation = Reference.listOfCameraTransations.Count;
-                        for (int i = 0; i < t_NumberOfTransation; i++) {
-
-                            SerializedProperty t_IndexOfSelectedCameraSettings = SP_ListOfCameraTransations.GetArrayElementAtIndex(i).FindPropertyRelative("indexOfSelectedCameraSettings");
-                            t_IndexOfSelectedCameraSettings.intValue = 0;
-                        }
-                    }
-                }
-                if (Reference.cameraSettingPresets != null && GUILayout.Button("Remove", GUILayout.Width(100))) {
-
-                    SP_CameraSettingPersets.objectReferenceValue = null;
-                    return;
-                }
-
-                if (GUILayout.Button("+Transation", GUILayout.Width(100)))
-                {
-                    Reference.listOfCameraTransations.Add(new CameraTransation());
-                    Reference.listOfCameraTransations[Reference.listOfCameraTransations.Count - 1].transationClips = new System.Collections.Generic.List<CameraTransationClip>();
-                    return;
-                }
-            }
-            EditorGUILayout.EndHorizontal();
-
-            if (Reference.cameraSettingPresets != null)
-                DrawSettingsEditor(Reference.cameraSettingPresets, null, ref Reference.showPresetsOfCameraSettings, ref cameraPresetEditor);
-
-
-            DrawHorizontalLine();
-            EditorGUILayout.Space();
+            
 
             int t_NumberOfCameraTransation = Reference.listOfCameraTransations.Count;
+
+            if (t_NumberOfCameraTransation > 0)
+                DrawHorizontalLine();
+
             for (int i = 0; i < t_NumberOfCameraTransation; i++)
             {
                 SerializedProperty t_SPOnShowOnEditor = SP_ListOfCameraTransations.GetArrayElementAtIndex(i).FindPropertyRelative("showOnEditor");
@@ -166,15 +135,13 @@
                     SerializedProperty t_SPNameOfTransation = SP_ListOfCameraTransations.GetArrayElementAtIndex(i).FindPropertyRelative("nameOfTransation");
                     SerializedProperty t_SPTransationType = SP_ListOfCameraTransations.GetArrayElementAtIndex(i).FindPropertyRelative("transationType");
                     SerializedProperty t_SPDefaultCameraSettings = SP_ListOfCameraTransations.GetArrayElementAtIndex(i).FindPropertyRelative("defaultCameraSettings");
-                    SerializedProperty t_SPTransationClips = SP_ListOfCameraTransations.GetArrayElementAtIndex(i).FindPropertyRelative("transationClips");
+                    
 
                     EditorGUI.indentLevel += 1;
                     EditorGUILayout.BeginVertical();
                     {
                         EditorGUILayout.PropertyField(t_SPNameOfTransation);
                         EditorGUILayout.PropertyField(t_SPTransationType);
-
-
 
                         EditorGUILayout.Space();
                         DrawHorizontalLine();
@@ -217,29 +184,8 @@
                         int t_NumberOfTransationClip = Reference.listOfCameraTransations[i].transationClips.Count;
                         for (int j = 0; j < t_NumberOfTransationClip; j++) {
 
-                            EditorGUI.indentLevel += 1;
-                            EditorGUILayout.BeginVertical();
-                            {
-                                
-                                SerializedProperty t_SPCameraOrigin = t_SPTransationClips.GetArrayElementAtIndex(j).FindPropertyRelative("cameraOrigin");
-                                SerializedProperty t_SPCameraFocuses = t_SPTransationClips.GetArrayElementAtIndex(j).FindPropertyRelative("cameraFocuses");
-
-                                if (SP_CameraSettingPersets.objectReferenceValue != null) {
-
-                                }
-
-                                if (!t_SPUseThisTransationSettingsForAllClip.boolValue) {
-
-                                    SerializedProperty t_SPCameraSettingsForTransationClip = t_SPTransationClips.GetArrayElementAtIndex(j).FindPropertyRelative("cameraSettings");
-                                    EditorGUILayout.PropertyField(t_SPCameraSettingsForTransationClip);
-                                }
-
-                                EditorGUILayout.PropertyField(t_SPCameraOrigin);
-                                EditorGUILayout.PropertyField(t_SPCameraFocuses);
-
-                            }
-                            EditorGUILayout.EndVertical();
-                            EditorGUI.indentLevel -= 1;
+                            CustomGUIForTransationClip(i, j, t_SPUseThisTransationSettingsForAllClip.boolValue);
+                            
                         }
 
                         
@@ -249,6 +195,97 @@
                 }
             }
 
+            DrawHorizontalLine();
+            if (GUILayout.Button("+Transation"))
+            {
+                Reference.listOfCameraTransations.Add(new CameraTransation());
+                Reference.listOfCameraTransations[Reference.listOfCameraTransations.Count - 1].transationClips = new List<CameraTransationClip>();
+                return;
+            }
+
+        }
+
+        private void CustomGUIForPresetCameraSettings() {
+
+            EditorGUILayout.Space();
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUI.BeginChangeCheck();
+                EditorGUILayout.PropertyField(SP_CameraSettingPersets);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    if (SP_CameraSettingPersets.objectReferenceValue == null)
+                    {
+
+                        int t_NumberOfTransation = Reference.listOfCameraTransations.Count;
+                        for (int i = 0; i < t_NumberOfTransation; i++)
+                        {
+
+                            SerializedProperty t_IndexOfSelectedCameraSettings = SP_ListOfCameraTransations.GetArrayElementAtIndex(i).FindPropertyRelative("indexOfSelectedCameraSettings");
+                            t_IndexOfSelectedCameraSettings.intValue = 0;
+                        }
+                    }
+                }
+
+                if (Reference.cameraSettingPresets != null)
+                {
+                    if (GUILayout.Button("-Remove", GUILayout.Width(100)))
+                    {
+                        SP_CameraSettingPersets.objectReferenceValue = null;
+                        return;
+                    }
+                }
+                else
+                {
+
+                    if (GUILayout.Button("+New", GUILayout.Width(100)))
+                    {
+
+                        ScriptableObject t_NewCameraSettings = ScriptableObject.CreateInstance(typeof(FaithCameraSettings)) as FaithCameraSettings;
+                        ((FaithCameraSettings)t_NewCameraSettings).cameraSettings = new List<CameraSettingsInfo>();
+                        AssetDatabase.CreateAsset(t_NewCameraSettings, "Assets/CameraSettings.asset");
+                        SP_CameraSettingPersets.objectReferenceValue = t_NewCameraSettings;
+
+                    }
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
+            if (Reference.cameraSettingPresets != null)
+            {
+                DrawSettingsEditor(Reference.cameraSettingPresets, null, ref Reference.showPresetsOfCameraSettings, ref cameraPresetEditor);
+            }
+        }
+
+        private void CustomGUIForTransationClip(int t_TransationIndex, int t_ClipIndex, bool t_UseThisTransationSettingsForAllClip) {
+
+            SerializedProperty t_SPTransationClips = SP_ListOfCameraTransations.GetArrayElementAtIndex(t_TransationIndex).FindPropertyRelative("transationClips");
+
+            EditorGUI.indentLevel += 1;
+            EditorGUILayout.BeginVertical();
+            {
+
+                SerializedProperty t_SPCameraOrigin = t_SPTransationClips.GetArrayElementAtIndex(j).FindPropertyRelative("cameraOrigin");
+                SerializedProperty t_SPCameraFocuses = t_SPTransationClips.GetArrayElementAtIndex(j).FindPropertyRelative("cameraFocuses");
+
+                if (SP_CameraSettingPersets.objectReferenceValue != null)
+                {
+
+                }
+
+                if (!t_UseThisTransationSettingsForAllClip)
+                {
+
+                    SerializedProperty t_SPCameraSettingsForTransationClip = t_SPTransationClips.GetArrayElementAtIndex(j).FindPropertyRelative("cameraSettings");
+                    EditorGUILayout.PropertyField(t_SPCameraSettingsForTransationClip);
+                }
+
+                EditorGUILayout.PropertyField(t_SPCameraOrigin);
+                EditorGUILayout.PropertyField(t_SPCameraFocuses);
+
+            }
+            EditorGUILayout.EndVertical();
+            EditorGUI.indentLevel -= 1;
         }
 
         #endregion
