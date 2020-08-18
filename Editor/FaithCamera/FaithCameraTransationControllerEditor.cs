@@ -124,6 +124,7 @@
                     if (GUILayout.Button("-Remove",GUILayout.Width(100))) {
 
                         Reference.listOfCameraTransations.RemoveAt(i);
+                        Reference.listOfCameraTransations.TrimExcess();
                         return;
                     }
                 }
@@ -180,13 +181,14 @@
                             EditorGUI.indentLevel += 1;
                             DrawCustomGUIForCameraSettings(t_SPDefaultCameraSettings);
 
-                            if(Reference.listOfCameraTransations[i].transationClips.Count > 0)
-                                DrawHorizontalLine();
-
                             EditorGUI.indentLevel -= 1;
                         }
 
                         int t_NumberOfTransationClip = Reference.listOfCameraTransations[i].transationClips.Count;
+
+                        if (t_NumberOfTransationClip > 0)
+                            DrawHorizontalLine();
+
                         for (int j = 0; j < t_NumberOfTransationClip; j++) {
 
                             CustomGUIForTransationClip(i, j, t_SPUseThisTransationSettingsForAllClip.boolValue, t_OptionsForCameraSettings);
@@ -336,7 +338,8 @@
                                 DrawCustomGUIForCameraSettings(t_SPCameraSettingsForTransationClip);
                             }
                         }
-                        else {
+                        else if(Reference.cameraSettingPresets != null)
+                        {
 
                             //if : Assigned, Then it will shown from the drop down option
                             //if : No settings are made in the option, it will switch to custom.
