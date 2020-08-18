@@ -156,6 +156,7 @@
                                 t_IndexOfSelectedCameraSettings.intValue = EditorGUILayout.Popup(
                                     t_IndexOfSelectedCameraSettings.intValue,
                                     t_OptionsForCameraSettings.ToArray());
+
                                 if (EditorGUI.EndChangeCheck()) {
 
                                     if (Reference.cameraSettingPresets != null) {
@@ -178,13 +179,17 @@
                             && ((Reference.cameraSettingPresets != null && Reference.listOfCameraTransations[i].indexOfSelectedCameraSettings == Reference.cameraSettingPresets.GetNumberOfAvailableCameraSettings()) || Reference.cameraSettingPresets == null)) {
                             EditorGUI.indentLevel += 1;
                             DrawCustomGUIForCameraSettings(t_SPDefaultCameraSettings);
+
+                            if(Reference.listOfCameraTransations[i].transationClips.Count > 0)
+                                DrawHorizontalLine();
+
                             EditorGUI.indentLevel -= 1;
                         }
 
                         int t_NumberOfTransationClip = Reference.listOfCameraTransations[i].transationClips.Count;
                         for (int j = 0; j < t_NumberOfTransationClip; j++) {
 
-                            CustomGUIForTransationClip(i, j, t_SPUseThisTransationSettingsForAllClip.boolValue);
+                            CustomGUIForTransationClip(i, j, t_SPUseThisTransationSettingsForAllClip.boolValue, t_OptionsForCameraSettings);
                             
                         }
 
@@ -257,7 +262,11 @@
             }
         }
 
-        private void CustomGUIForTransationClip(int t_TransationIndex, int t_ClipIndex, bool t_UseThisTransationSettingsForAllClip) {
+        private void CustomGUIForTransationClip(
+            int t_TransationIndex,
+            int t_ClipIndex,
+            bool t_UseThisTransationSettingsForAllClip,
+            List<string> t_OptionsForCameraSettings) {
 
             SerializedProperty t_SPTransationClips = SP_ListOfCameraTransations.GetArrayElementAtIndex(t_TransationIndex).FindPropertyRelative("transationClips");
 
@@ -265,24 +274,102 @@
             EditorGUILayout.BeginVertical();
             {
 
-                SerializedProperty t_SPCameraOrigin = t_SPTransationClips.GetArrayElementAtIndex(t_ClipIndex).FindPropertyRelative("cameraOrigin");
-                SerializedProperty t_SPCameraFocuses = t_SPTransationClips.GetArrayElementAtIndex(t_ClipIndex).FindPropertyRelative("cameraFocuses");
-
-                if (SP_CameraSettingPersets.objectReferenceValue != null)
+                SerializedProperty t_SPShowOnEditor = t_SPTransationClips.GetArrayElementAtIndex(t_ClipIndex).FindPropertyRelative("showOnEditor");
+                EditorGUILayout.BeginHorizontal();
                 {
+                    t_SPShowOnEditor.boolValue = EditorGUILayout.Foldout(
+                            t_SPShowOnEditor.boolValue,
+                            "Clip (" + t_ClipIndex + ")",
+                            true
+                        );
+                    if (GUILayout.Button("-Remove", GUILayout.Width(100f))) {
 
+                        Reference.listOfCameraTransations[t_TransationIndex].transationClips.RemoveAt(t_ClipIndex);
+                        return;
+                    }
                 }
+                EditorGUILayout.EndHorizontal();
+                
 
-                if (!t_UseThisTransationSettingsForAllClip)
-                {
+                if (t_SPShowOnEditor.boolValue) {
 
-                    SerializedProperty t_SPCameraSettingsForTransationClip = t_SPTransationClips.GetArrayElementAtIndex(t_ClipIndex).FindPropertyRelative("cameraSettings");
-                    EditorGUILayout.PropertyField(t_SPCameraSettingsForTransationClip);
+                    EditorGUI.indentLevel += 1;
+
+                    SerializedProperty t_SPCameraOrigin = t_SPTransationClips.GetArrayElementAtIndex(t_ClipIndex).FindPropertyRelative("cameraOrigin");
+                    SerializedProperty t_SPCameraFocuses = t_SPTransationClips.GetArrayElementAtIndex(t_ClipIndex).FindPropertyRelative("cameraFocuses");
+                    SerializedProperty t_SPOverrideCameraFOV = t_SPTransationClips.GetArrayElementAtIndex(t_ClipIndex).FindPropertyRelative("overrideCameraFOV");
+                    SerializedProperty t_SPOverrideCameraOrthograpicSize = t_SPTransationClips.GetArrayElementAtIndex(t_ClipIndex).FindPropertyRelative("overrideCameraOrthographicSize");
+                    SerializedProperty t_SPDurationOfTransation = t_SPTransationClips.GetArrayElementAtIndex(t_ClipIndex).FindPropertyRelative("durationOfTransation");
+
+                    EditorGUILayout.PropertyField(t_SPCameraOrigin);
+                    EditorGUILayout.PropertyField(t_SPCameraFocuses);
+                    if (Reference.listOfCameraTransations[t_TransationIndex].transationType == TransationType.Cinematic)
+                    {
+                        EditorGUILayout.Space();
+                        EditorGUILayout.PropertyField(t_SPDurationOfTransation);
+                    }
+
+                    EditorGUILayout.Space();
+                    EditorGUILayout.LabelField("OverrideValue", EditorStyles.boldLabel);
+                    EditorGUILayout.PropertyField(t_SPOverrideCameraFOV);
+                    EditorGUILayout.PropertyField(t_SPOverrideCameraOrthograpicSize);
+
+                    EditorGUILayout.Space();
+                    if (!t_UseThisTransationSettingsForAllClip)
+                    {
+                        SerializedProperty t_SPCameraSettingsForTransationClip  = t_SPTransationClips.GetArrayElementAtIndex(t_ClipIndex).FindPropertyRelative("cameraSettings");
+                        SerializedProperty t_SPShowCameraSettings               = t_SPTransationClips.GetArrayElementAtIndex(t_ClipIndex).FindPropertyRelative("showCameraSettings");
+
+                        
+
+                        if (SP_CameraSettingPersets.objectReferenceValue == null)
+                        {
+                            //if : No CameraSettings Preset aren't assigned
+                            t_SPShowCameraSettings.boolValue = EditorGUILayout.Foldout(
+                                t_SPShowCameraSettings.boolValue,
+                                "CameraSettings",
+                                true
+                            );
+
+                            if (t_SPShowCameraSettings.boolValue) {
+
+                                DrawCustomGUIForCameraSettings(t_SPCameraSettingsForTransationClip);
+                            }
+                        }
+                        else {
+
+                            //if : Assigned, Then it will shown from the drop down option
+                            //if : No settings are made in the option, it will switch to custom.
+
+                            SerializedProperty t_SPIndexOfSelectedCameraSettings = t_SPTransationClips.GetArrayElementAtIndex(t_ClipIndex).FindPropertyRelative("indexOfSelectedCameraSettings");
+
+                            EditorGUI.BeginChangeCheck();
+                            {
+                                t_SPIndexOfSelectedCameraSettings.intValue = EditorGUILayout.Popup(
+                                    "CameraSettings",
+                                    t_SPIndexOfSelectedCameraSettings.intValue,
+                                    t_OptionsForCameraSettings.ToArray());
+                            }
+                            if (EditorGUI.EndChangeCheck()) {
+
+                                if (t_SPIndexOfSelectedCameraSettings.intValue < Reference.cameraSettingPresets.cameraSettings.Count) {
+
+                                    CopyCameraSettingsFromOneToAnother(t_SPCameraSettingsForTransationClip, Reference.cameraSettingPresets.cameraSettings[t_SPIndexOfSelectedCameraSettings.intValue].cameraSettings);
+                                }
+                            }
+                            
+
+                            if (t_SPIndexOfSelectedCameraSettings.intValue == Reference.cameraSettingPresets.cameraSettings.Count) {
+
+                                EditorGUI.indentLevel += 1;
+                                DrawCustomGUIForCameraSettings(t_SPCameraSettingsForTransationClip);
+                                EditorGUI.indentLevel -= 1;
+                            }
+                        }
+                    }
+
+                    EditorGUI.indentLevel -= 1;
                 }
-
-                EditorGUILayout.PropertyField(t_SPCameraOrigin);
-                EditorGUILayout.PropertyField(t_SPCameraFocuses);
-
             }
             EditorGUILayout.EndVertical();
             EditorGUI.indentLevel -= 1;

@@ -82,13 +82,20 @@
     [System.Serializable]
     public class CameraTransationClip
     {
+#if UNITY_EDITOR
+
+        public bool showOnEditor;
+        public bool showCameraSettings;
+        public int indexOfSelectedCameraSettings = 0;
+#endif
+
         public Transform        cameraOrigin;
         public List<Transform>  cameraFocuses;
 
         public CameraSettings cameraSettings;
 
         [Range(0.1f,50f)]
-        public float durationOfTransation;
+        public float durationOfTransation = 0.1f;
 
         [Range(0f, 180f)]
         public float overrideCameraFOV = 60;
