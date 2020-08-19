@@ -15,6 +15,8 @@
 
 #endif
 
+        public static FaithCameraController Instance;
+
         public Camera cameraReference;
         public Transform cameraContainerTransformReference;
 
@@ -50,6 +52,8 @@
         #region Mono Behaviour
 
         private void Awake () {
+
+            Instance = this;
 
             m_CameraTransformReference  = cameraReference.transform;
             m_IsOrthographicCamera      = cameraReference.orthographic;
@@ -205,7 +209,8 @@
         private void ConfigureCamera(
             List<Transform> t_CameraFocuses,
             Transform t_CameraOriginPosition = null,
-            CameraSettings t_CameraSettings = null) {
+            CameraSettings t_CameraSettings = null,
+            UnityAction t_OnCameraReachedTargetedPosition = null) {
 
             m_CameraFocuses = t_CameraFocuses;
             m_CameraOriginPosition = t_CameraOriginPosition;
@@ -218,6 +223,8 @@
 
                 m_CurrentCameraSettings = t_CameraSettings;
             }
+
+            OnCameraReachedTargetedPosition = t_OnCameraReachedTargetedPosition;
         }
 
         #endregion
@@ -227,9 +234,10 @@
         public void FocusCamera(
             List<Transform> t_CameraFocuses,
             Transform t_CameraOriginPosition = null,
-            CameraSettings t_CameraSettings = null) {
+            CameraSettings t_CameraSettings = null,
+            UnityAction t_OnCameraReachedTargetedPosition = null) {
 
-            ConfigureCamera(t_CameraFocuses, t_CameraOriginPosition, t_CameraSettings);
+            ConfigureCamera(t_CameraFocuses, t_CameraOriginPosition, t_CameraSettings, t_OnCameraReachedTargetedPosition);
         }
 
         #endregion
