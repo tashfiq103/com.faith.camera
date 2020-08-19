@@ -60,8 +60,7 @@
 
         private void CustomGUIOnPlayMode()
         {
-
-
+            
         }
 
         private void CustomGUI() {

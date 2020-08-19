@@ -31,6 +31,13 @@
         Dynamic
     }
 
+    public enum TransitionMode
+    {
+        Once,
+        Loop,
+        PingPong
+    }
+
     [System.Serializable]
     public class CameraSettings {
 
@@ -117,7 +124,8 @@
 
         public bool useCentralCameraSettings = true;
         public string nameOfTransation;
-        public TransationType transationType;
+        public TransationType transitionType;
+        public TransitionMode transitionMode;
         public CameraSettings defaultCameraSettings;
 
         public List<CameraTransationClip> transationClips;
