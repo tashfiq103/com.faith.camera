@@ -87,6 +87,10 @@
             //TransationLoop
             while (t_CurrentClipIndex >= 0 && t_CurrentClipIndex < t_NumberOfAvailableClip) {
 
+                //Overriding    :   CameraFOV & OrthographicSize
+                listOfCameraTransations[t_TransitionIndex].transationClips[t_CurrentClipIndex].cameraSettings.cameraFOV = listOfCameraTransations[t_TransitionIndex].transationClips[t_CurrentClipIndex].overrideCameraFOV;
+                listOfCameraTransations[t_TransitionIndex].transationClips[t_CurrentClipIndex].cameraSettings.cameraOrthographicSize = listOfCameraTransations[t_TransitionIndex].transationClips[t_CurrentClipIndex].overrideCameraOrthographicSize;
+
                 //Starting : Camera transition with the new origin and clip respective settings.
                 FaithCameraController.Instance.FocusCamera (
                     t_CameraFocuses: listOfCameraTransations[t_TransitionIndex].transationClips[t_CurrentClipIndex].cameraFocuses,

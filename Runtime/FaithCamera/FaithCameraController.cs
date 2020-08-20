@@ -186,7 +186,7 @@
                 float t_ModifiedFOV = Mathf.Lerp(
                         cameraReference.orthographicSize,
                         m_CurrentCameraSettings.cameraOrthographicSize,
-                        t_RateOfChange
+                        t_RateOfChange * Time.deltaTime
                     );
 
                 cameraReference.orthographicSize = t_ModifiedFOV;
@@ -200,7 +200,7 @@
                 float t_ModifiedFOV = Mathf.Lerp(
                         cameraReference.fieldOfView,
                         m_CurrentCameraSettings.cameraFOV,
-                        t_RateOfChange
+                        t_RateOfChange * Time.deltaTime
                     );
 
                 cameraReference.fieldOfView = t_ModifiedFOV;
@@ -248,6 +248,8 @@
             Transform t_CameraOriginPosition = null,
             CameraSettings t_CameraSettings = null,
             UnityAction t_OnCameraReachedTargetedPosition = null) {
+
+            Debug.Log("CameraFOV : " + t_CameraSettings.cameraFOV);
 
             ConfigureCamera(t_CameraFocuses, t_CameraOriginPosition, t_CameraSettings, t_OnCameraReachedTargetedPosition);
         }
