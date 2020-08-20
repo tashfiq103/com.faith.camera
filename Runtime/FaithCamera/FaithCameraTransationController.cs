@@ -87,8 +87,6 @@
             //TransationLoop
             while (t_CurrentClipIndex >= 0 && t_CurrentClipIndex < t_NumberOfAvailableClip) {
 
-
-
                 //Starting : Camera transition with the new origin and clip respective settings.
                 FaithCameraController.Instance.FocusCamera (
                     t_CameraFocuses: listOfCameraTransations[t_TransitionIndex].transationClips[t_CurrentClipIndex].cameraFocuses,

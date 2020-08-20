@@ -27,8 +27,10 @@
         #region Private Variables
 
         private CameraSettings  m_CurrentCameraSettings;
+        private Vector3         m_ModifiedForwardVelocity;
         private bool            m_IsOrthographicCamera = false;
         private float           m_DeltaTime;
+
 
         private Transform       m_CameraTransformReference;
 
@@ -128,8 +130,7 @@
             Vector3 t_CameraOrigin               = m_CameraOriginPosition == null ? m_FocusPosition : m_CameraOriginPosition.position;
             t_CameraOrigin                      += m_CurrentCameraSettings.cameraPositionOffset;
 
-            Vector3 m_SmothTime = Vector3.one * 0.0167f;
-            float t_CurrentForwardVelocity = m_CameraOriginPosition == null
+            float t_ForwardVelocityAsSmoothTime = m_CameraOriginPosition == null
                 ? m_CurrentCameraSettings.forwardVelocity
                 : Mathf.Clamp(0.0167f, 1, m_CurrentCameraSettings.forwardVelocity * (1 - m_CurrentCameraSettings.curveForForwardVelocity.Evaluate(Vector3.Distance(m_CameraOriginPosition.position, cameraContainerTransformReference.position) / m_MaximumDistanceFromNewCameraOrigin))); ;
 
@@ -137,10 +138,8 @@
             Vector3 t_ModifiedPosition = Vector3.SmoothDamp(
                 t_CurrentPositionOfTheCamera,
                 t_CameraOrigin,
-                ref m_SmothTime,
-                t_CurrentForwardVelocity,
-                m_CurrentCameraSettings.forwardVelocity,
-                m_DeltaTime
+                ref m_ModifiedForwardVelocity,
+                t_ForwardVelocityAsSmoothTime
             );
             cameraContainerTransformReference.position = t_ModifiedPosition;
 
@@ -152,7 +151,6 @@
 
                         OnCameraReachedTargetedPosition?.Invoke();
                         EnableAndDisableThisMonoBehaviour(false);
-                        Debug.Log("Ja bhabsilam");
                         break;
                     case FocusType.Follow:
 
@@ -237,8 +235,6 @@
                 cameraContainerTransformReference.position,
                 t_TargetedPosition
             );
-
-            Debug.Log(m_CurrentCameraSettings.focusType);
 
             EnableAndDisableThisMonoBehaviour(true);
         }
