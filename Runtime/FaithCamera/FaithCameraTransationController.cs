@@ -73,35 +73,51 @@
             //Variable Declaration
             
             Transform t_NewCameraPointer    = new GameObject().transform;
-            
+#if UNITY_EDITOR
+            t_NewCameraPointer.name = "#CameraPointer";
+#endif
 
-            bool t_IsReachedToDestinationPoint = false;
-            WaitUntil t_WaitUntilCameraReachedToInitialPoint = new WaitUntil (() => {
-                if (t_IsReachedToDestinationPoint || m_IsExecuteForceQuitFromCameraTransition)
-                    return true;
-                return false;
-            });
             int t_NumberOfAvailableClip = listOfCameraTransations[t_TransitionIndex].transationClips.Count;
             int t_CurrentClipIndex = 0;
             int t_NextClipDirectionValue = 1;
+            float t_CycleLength = 0.0167f;
+            WaitForSeconds t_CycleDelay = new WaitForSeconds(t_CycleLength);
 
             //-------------
             //TransationLoop
             while (t_CurrentClipIndex >= 0 && t_CurrentClipIndex < t_NumberOfAvailableClip) {
 
-                t_NewCameraPointer              = listOfCameraTransations[t_TransitionIndex].transationClips[t_CurrentClipIndex].cameraOrigin;
 
-                //WaitUntil Transition Finish
-                t_IsReachedToDestinationPoint = false;
+
+                //Starting : Camera transition with the new origin and clip respective settings.
                 FaithCameraController.Instance.FocusCamera (
                     t_CameraFocuses: listOfCameraTransations[t_TransitionIndex].transationClips[t_CurrentClipIndex].cameraFocuses,
-                    t_CameraOriginPosition: listOfCameraTransations[t_TransitionIndex].transationClips[t_CurrentClipIndex].cameraOrigin,
-                    t_CameraSettings : listOfCameraTransations[t_TransitionIndex].transationClips[t_CurrentClipIndex].cameraSettings,
-                    t_OnCameraReachedTargetedPosition: delegate {
-                        t_IsReachedToDestinationPoint = true;
-                    }
+                    t_CameraOriginPosition: t_NewCameraPointer,
+                    t_CameraSettings : listOfCameraTransations[t_TransitionIndex].transationClips[t_CurrentClipIndex].cameraSettings
                 );
-                yield return t_WaitUntilCameraReachedToInitialPoint;
+
+                //Initialization    :   For Camera
+                float t_DurationOfTransation = listOfCameraTransations[t_TransitionIndex].transationClips[t_CurrentClipIndex].durationOfTransation;
+                float t_RemainingTimeForTransation = t_DurationOfTransation;
+                float t_TimeProgression = 0;
+                Vector3 t_InitialPositionOfCamera = FaithCameraController.Instance.cameraContainerTransformReference.position;
+                
+                //Timer :   For transition clip
+                while(!m_IsExecuteForceQuitFromCameraTransition && t_RemainingTimeForTransation > 0){
+
+                    t_TimeProgression = 1f - (t_RemainingTimeForTransation / t_DurationOfTransation);
+                    
+                    Vector3 t_ModifiedPosition = Vector3.Lerp(
+                        t_InitialPositionOfCamera,
+                        listOfCameraTransations[t_TransitionIndex].transationClips[t_CurrentClipIndex].cameraOrigin.position,
+                        t_TimeProgression
+                    );
+                    t_NewCameraPointer.position = t_ModifiedPosition;
+                    
+                    yield return t_CycleDelay;
+                    
+                    t_RemainingTimeForTransation -= t_CycleLength;
+                }
 
                 //if : ForceQuitExecute
                 if(m_IsExecuteForceQuitFromCameraTransition)
@@ -135,6 +151,7 @@
                 }
             }
 
+            Destroy(t_NewCameraPointer.gameObject);
             StopCoroutine(ControllerForCinematicCameraTransition(-1));
         }
 
@@ -151,16 +168,15 @@
 
             if (!IsValidIndexForCameraTransition (t_TransitionIndex))
                 return;
-
+            
             if (m_IsCinematicTransitionRunning) {
-
-                if (t_OverrideCurrentTransitionIfAny) {
-
+                if (t_OverrideCurrentTransitionIfAny)
                     StartCoroutine (ControllerForOverridingCinematicCameraTransition (t_TransitionIndex));
-                }
-            } else {
-
-            }
+                else
+                    StartCoroutine (ControllerForCinematicCameraTransition (t_TransitionIndex));
+            } else 
+                StartCoroutine (ControllerForCinematicCameraTransition (t_TransitionIndex));
+            
         }
 
         #endregion

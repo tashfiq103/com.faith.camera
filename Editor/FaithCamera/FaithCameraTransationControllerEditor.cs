@@ -15,6 +15,8 @@
         private SerializedProperty SP_CameraSettingPersets;
         private SerializedProperty SP_ListOfCameraTransations;
 
+        private string SELECTED_CAMERA_TRANSITION_INDEX = "SELECTED_CAMERA_TRANSITION_INDEX";
+
         #endregion
 
         #region Editor
@@ -23,6 +25,9 @@
             Reference = (FaithCameraTransationController) target;
 
             if (Reference != null) {
+
+                if (Reference.listOfCameraTransations == null)
+                    Reference.listOfCameraTransations = new List<CameraTransation> ();
 
                 SP_CameraSettingPersets = serializedObject.FindProperty ("cameraSettingPresets");
                 SP_ListOfCameraTransations = serializedObject.FindProperty ("listOfCameraTransations");
@@ -42,6 +47,9 @@
             } else {
 
                 CustomGUI ();
+
+                if(EditorApplication.isPlaying)
+                    CustomGUIOnPlayMode();
             }
 
             serializedObject.ApplyModifiedProperties ();
@@ -68,6 +76,31 @@
             t_SerializedCameraSettings.FindPropertyRelative ("focusConstraint").FindPropertyRelative ("z").boolValue = t_NewValue.focusConstraint.z;
             t_SerializedCameraSettings.FindPropertyRelative ("focusType").enumValueIndex = (int) t_NewValue.focusType;
 
+        }
+
+        private void CopyNewCameraSettingsToAllTransitionClips(int t_TransitionIndex, CameraSettings t_NewCameraSettings) {
+
+            t_NewCameraSettings.focusType = FocusType.Follow;
+
+            int t_NumberOfClip = Reference.listOfCameraTransations[t_TransitionIndex].transationClips.Count;
+            for (int i = 0; i < t_NumberOfClip; i++) {
+
+                SerializedProperty t_CameraSettingsOfClip = SP_ListOfCameraTransations.GetArrayElementAtIndex(t_TransitionIndex).FindPropertyRelative("transationClips").GetArrayElementAtIndex(i).FindPropertyRelative("cameraSettings");
+                CopyCameraSettingsFromOneToAnother(t_CameraSettingsOfClip, t_NewCameraSettings);
+            }
+        }
+
+        private int GetSelectedCameraTransitionIndex () {
+
+            return PlayerPrefs.GetInt (SELECTED_CAMERA_TRANSITION_INDEX, 0);
+        }
+
+        private void SetNewIndexForSelectedCameraTransition(int t_NewIndex){
+
+            if(t_NewIndex >= 0 && t_NewIndex < Reference.listOfCameraTransations.Count)
+            {
+                PlayerPrefs.SetInt(SELECTED_CAMERA_TRANSITION_INDEX, t_NewIndex);
+            }
         }
 
         #endregion
@@ -125,11 +158,11 @@
 
                     EditorGUI.indentLevel += 1;
                     EditorGUILayout.BeginVertical (); {
-                        
+
                         EditorGUILayout.PropertyField (t_SPNameOfTransation);
                         EditorGUILayout.PropertyField (t_SPTransationType);
                         if (Reference.listOfCameraTransations[i].transitionType == TransationType.Cinematic)
-                            EditorGUILayout.PropertyField (SP_ListOfCameraTransations.GetArrayElementAtIndex (i).FindPropertyRelative ("transitionMode")); 
+                            EditorGUILayout.PropertyField (SP_ListOfCameraTransations.GetArrayElementAtIndex (i).FindPropertyRelative ("transitionMode"));
 
                         EditorGUILayout.Space ();
                         DrawHorizontalLine ();
@@ -152,7 +185,7 @@
                                             CopyCameraSettingsFromOneToAnother (
                                                 t_SPDefaultCameraSettings,
                                                 Reference.cameraSettingPresets.cameraSettings[t_IndexOfSelectedCameraSettings.intValue].cameraSettings);
-
+                                            CopyNewCameraSettingsToAllTransitionClips(i, Reference.cameraSettingPresets.cameraSettings[t_IndexOfSelectedCameraSettings.intValue].cameraSettings);
                                         }
                                     }
 
@@ -161,11 +194,15 @@
                         }
                         EditorGUILayout.EndHorizontal ();
 
+                        //if : CustomCameraSettings
                         if (t_SPUseThisTransationSettingsForAllClip.boolValue &&
                             ((Reference.cameraSettingPresets != null && Reference.listOfCameraTransations[i].indexOfSelectedCameraSettings == Reference.cameraSettingPresets.GetNumberOfAvailableCameraSettings ()) || Reference.cameraSettingPresets == null)) {
-                            EditorGUI.indentLevel += 1;
-                            DrawCustomGUIForCameraSettings (t_SPDefaultCameraSettings);
 
+                            EditorGUI.indentLevel += 1;
+                            EditorGUI.BeginChangeCheck();
+                            DrawCustomGUIForCameraSettings (t_SPDefaultCameraSettings);
+                            if(EditorGUI.EndChangeCheck())
+                                CopyNewCameraSettingsToAllTransitionClips(i, Reference.listOfCameraTransations[i].defaultCameraSettings);
                             EditorGUI.indentLevel -= 1;
                         }
 
@@ -341,6 +378,31 @@
             EditorGUI.indentLevel -= 1;
         }
 
+        private void CustomGUIOnPlayMode () {
+
+            EditorGUILayout.Space ();
+            DrawHorizontalLine ();
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.LabelField("Transition (" + GetSelectedCameraTransitionIndex() + ")", EditorStyles.boldLabel);
+                if(GUILayout.Button("<",GUILayout.Width(40f))){
+                    int t_NewIndex = GetSelectedCameraTransitionIndex() - 1;
+                    if(t_NewIndex < 0) t_NewIndex = Reference.listOfCameraTransations.Count - 1;
+                    SetNewIndexForSelectedCameraTransition(t_NewIndex);
+                }
+                if(GUILayout.Button(">",GUILayout.Width(40f))){
+                    int t_NewIndex = GetSelectedCameraTransitionIndex() + 1;
+                    if(t_NewIndex >= Reference.listOfCameraTransations.Count) t_NewIndex = 0;
+                    SetNewIndexForSelectedCameraTransition(t_NewIndex);
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
+            DrawHorizontalLine();
+            if(GUILayout.Button("Play")){
+                Reference.PlayTransition(GetSelectedCameraTransitionIndex());
+            }
+        }
         #endregion
     }
 }

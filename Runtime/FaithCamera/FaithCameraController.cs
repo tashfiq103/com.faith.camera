@@ -57,6 +57,8 @@
 
             m_CameraTransformReference  = cameraReference.transform;
             m_IsOrthographicCamera      = cameraReference.orthographic;
+
+            EnableAndDisableThisMonoBehaviour(false);
         }
 
         private void LateUpdate()
@@ -150,6 +152,7 @@
 
                         OnCameraReachedTargetedPosition?.Invoke();
                         EnableAndDisableThisMonoBehaviour(false);
+                        Debug.Log("Ja bhabsilam");
                         break;
                     case FocusType.Follow:
 
@@ -225,6 +228,19 @@
             }
 
             OnCameraReachedTargetedPosition = t_OnCameraReachedTargetedPosition;
+            
+            Vector3 t_TargetedPosition = Vector3.zero;
+            if(t_CameraOriginPosition == null) t_TargetedPosition = new Bounds(t_CameraFocuses[0].position, Vector3.zero).center;
+            else t_TargetedPosition = t_CameraOriginPosition.position;
+            
+            m_MaximumDistanceFromNewCameraOrigin = Vector3.Distance(
+                cameraContainerTransformReference.position,
+                t_TargetedPosition
+            );
+
+            Debug.Log(m_CurrentCameraSettings.focusType);
+
+            EnableAndDisableThisMonoBehaviour(true);
         }
 
         #endregion
