@@ -321,6 +321,9 @@
 
                     EditorGUILayout.Space ();
                     EditorGUILayout.LabelField ("OverrideValue", EditorStyles.boldLabel);
+
+                    
+
                     EditorGUILayout.PropertyField (t_SPOverrideCameraFOV);
                     EditorGUILayout.PropertyField (t_SPOverrideCameraOrthograpicSize);
 

@@ -5,9 +5,26 @@
 
     public class BaseEditorClassForFaithCamera : BaseEditorClass
     {
-        
+
+        public bool IsPerspectiveCamera() {
+
+            if (Camera.main != null)
+                if (Camera.main.orthographic)
+                    return false;
+
+            return true;
+
+        }
+
         public void DrawCustomGUIForCameraSettings(SerializedProperty t_CameraSettings)
         {
+            bool t_IsPerspectiveCamera = true;
+            if (Camera.main != null) {
+
+                if (Camera.main.orthographic)
+                    t_IsPerspectiveCamera = false;
+            }
+
 
             SerializedProperty t_ShowParameterForForwardVelocity = t_CameraSettings.FindPropertyRelative("showParameterOfForwardVelocity");
             SerializedProperty t_ForwardVelocity = t_CameraSettings.FindPropertyRelative("forwardVelocity");
@@ -38,104 +55,111 @@
 
             EditorGUI.indentLevel += 1;
 
-            //Section   :   Orthographic
-            t_ShowParameterForRateOfChangeOnOnOrthographicSize.boolValue = EditorGUILayout.Foldout(
+
+            if (!t_IsPerspectiveCamera)
+            {
+
+                //Section   :   Orthographic
+                t_ShowParameterForRateOfChangeOnOnOrthographicSize.boolValue = EditorGUILayout.Foldout(
                    t_ShowParameterForRateOfChangeOnOnOrthographicSize.boolValue,
                    "Orthographic",
                    true
                );
 
-            if (t_ShowParameterForRateOfChangeOnOnOrthographicSize.boolValue)
-            {
-                EditorGUI.indentLevel += 1;
-                EditorGUILayout.BeginVertical();
+                if (t_ShowParameterForRateOfChangeOnOnOrthographicSize.boolValue)
                 {
-                    t_CameraOrthographicSize.floatValue = EditorGUILayout.Slider(
-                        "OrthograpicSize",
-                        t_CameraOrthographicSize.floatValue,
-                        1,
-                        60
+                    EditorGUI.indentLevel += 1;
+                    EditorGUILayout.BeginVertical();
+                    {
+                        t_CameraOrthographicSize.floatValue = EditorGUILayout.Slider(
+                            "OrthograpicSize",
+                            t_CameraOrthographicSize.floatValue,
+                            1,
+                            60
+                        );
+
+                        t_RateOfChangeOnOrthographicSize.floatValue = EditorGUILayout.Slider(
+                                "rateOfChange",
+                                t_RateOfChangeOnOrthographicSize.floatValue,
+                                0f,
+                                1f
+                            );
+
+                        t_CurveForRateOfChangeOnOrthographicSize.animationCurveValue = EditorGUILayout.CurveField(
+                                "rateOfChangeOverTime",
+                                t_CurveForRateOfChangeOnOrthographicSize.animationCurveValue
+                            );
+
+                    }
+                    EditorGUILayout.EndVertical();
+                    EditorGUI.indentLevel -= 1;
+                }
+            }
+            else {
+
+                //Section   :   Perspective
+                t_ShowParameterForRateOfChangeOnFOV.boolValue = EditorGUILayout.Foldout(
+                        t_ShowParameterForRateOfChangeOnFOV.boolValue,
+                        "Perspective",
+                        true
                     );
 
-                    t_RateOfChangeOnOrthographicSize.floatValue = EditorGUILayout.Slider(
-                            "rateOfChange",
-                            t_RateOfChangeOnOrthographicSize.floatValue,
-                            0f,
-                            1f
-                        );
-
-                    t_CurveForRateOfChangeOnOrthographicSize.animationCurveValue = EditorGUILayout.CurveField(
-                            "rateOfChangeOverTime",
-                            t_CurveForRateOfChangeOnOrthographicSize.animationCurveValue
-                        );
-
-                }
-                EditorGUILayout.EndVertical();
-                EditorGUI.indentLevel -= 1;
-            }
-
-            //Section   :   Perspective
-            t_ShowParameterForRateOfChangeOnFOV.boolValue = EditorGUILayout.Foldout(
-                    t_ShowParameterForRateOfChangeOnFOV.boolValue,
-                    "Perspective",
-                    true
-                );
-
-            if (t_ShowParameterForRateOfChangeOnFOV.boolValue)
-            {
-                EditorGUI.indentLevel += 1;
-                EditorGUILayout.BeginVertical();
+                if (t_ShowParameterForRateOfChangeOnFOV.boolValue)
                 {
-                    t_CameraFOV.floatValue = EditorGUILayout.Slider(
-                        "FieldOfView",
-                        t_CameraFOV.floatValue,
-                        1,
-                        60
+                    EditorGUI.indentLevel += 1;
+                    EditorGUILayout.BeginVertical();
+                    {
+                        t_CameraFOV.floatValue = EditorGUILayout.Slider(
+                            "FieldOfView",
+                            t_CameraFOV.floatValue,
+                            1,
+                            60
+                        );
+
+                        t_RateOfChangeOnFOV.floatValue = EditorGUILayout.Slider(
+                                "rateOfChange",
+                                t_RateOfChangeOnFOV.floatValue,
+                                0f,
+                                1f
+                            );
+
+                        t_CurveForRateOfChangeOnFOV.animationCurveValue = EditorGUILayout.CurveField(
+                            "rateOfChangeOverTime",
+                            t_CurveForRateOfChangeOnFOV.animationCurveValue
+                            );
+
+                    }
+                    EditorGUILayout.EndVertical();
+                    EditorGUI.indentLevel -= 1;
+                }
+
+                //Section   :   ForwardVelocity
+                t_ShowParameterForForwardVelocity.boolValue = EditorGUILayout.Foldout(
+                        t_ShowParameterForForwardVelocity.boolValue,
+                        "ForwardVelocity",
+                        true
                     );
-
-                    t_RateOfChangeOnFOV.floatValue = EditorGUILayout.Slider(
-                            "rateOfChange",
-                            t_RateOfChangeOnFOV.floatValue,
-                            0f,
-                            1f
-                        );
-
-                    t_CurveForRateOfChangeOnFOV.animationCurveValue = EditorGUILayout.CurveField(
-                        "rateOfChangeOverTime",
-                        t_CurveForRateOfChangeOnFOV.animationCurveValue
-                        );
-
-                }
-                EditorGUILayout.EndVertical();
-                EditorGUI.indentLevel -= 1;
-            }
-
-            //Section   :   ForwardVelocity
-            t_ShowParameterForForwardVelocity.boolValue = EditorGUILayout.Foldout(
-                    t_ShowParameterForForwardVelocity.boolValue,
-                    "ForwardVelocity",
-                    true
-                );
-            if (t_ShowParameterForForwardVelocity.boolValue)
-            {
-
-                EditorGUI.indentLevel += 1;
-                EditorGUILayout.BeginVertical();
+                if (t_ShowParameterForForwardVelocity.boolValue)
                 {
-                    t_ForwardVelocity.floatValue = EditorGUILayout.Slider(
-                            "rateOfChange",
-                            t_ForwardVelocity.floatValue,
-                            0f,
-                            1f
-                        );
 
-                    t_CurveForForwardVelocity.animationCurveValue = EditorGUILayout.CurveField(
-                            "rateOfChangeOverTime",
-                            t_CurveForForwardVelocity.animationCurveValue
-                        );
+                    EditorGUI.indentLevel += 1;
+                    EditorGUILayout.BeginVertical();
+                    {
+                        t_ForwardVelocity.floatValue = EditorGUILayout.Slider(
+                                "rateOfChange",
+                                t_ForwardVelocity.floatValue,
+                                0f,
+                                1f
+                            );
+
+                        t_CurveForForwardVelocity.animationCurveValue = EditorGUILayout.CurveField(
+                                "rateOfChangeOverTime",
+                                t_CurveForForwardVelocity.animationCurveValue
+                            );
+                    }
+                    EditorGUILayout.EndVertical();
+                    EditorGUI.indentLevel -= 1;
                 }
-                EditorGUILayout.EndVertical();
-                EditorGUI.indentLevel -= 1;
             }
 
             //Section   :   AngulerVelocity
