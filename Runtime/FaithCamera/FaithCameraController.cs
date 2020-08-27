@@ -249,8 +249,6 @@
             CameraSettings t_CameraSettings = null,
             UnityAction t_OnCameraReachedTargetedPosition = null) {
 
-            Debug.Log("CameraFOV : " + t_CameraSettings.cameraFOV);
-
             ConfigureCamera(t_CameraFocuses, t_CameraOriginPosition, t_CameraSettings, t_OnCameraReachedTargetedPosition);
         }
 
