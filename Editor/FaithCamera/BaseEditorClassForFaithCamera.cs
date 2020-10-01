@@ -113,7 +113,7 @@
                             "FieldOfView",
                             t_CameraFOV.floatValue,
                             1,
-                            60
+                            180
                         );
 
                         t_RateOfChangeOnFOV.floatValue = EditorGUILayout.Slider(
